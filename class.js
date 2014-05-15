@@ -80,24 +80,25 @@
    Circle.prototype = {
      pointGenerate: function () {
        this.position = this.positionPaths[this.positionIndex][this.positionCount];
-       console.log(this.position);
        this.x = [this.position[0], 0];
        this.y = [0, this.position[1]];
        if (this.positionCount < this.positionPaths[this.positionIndex].length -
          1) {
          this.positionCount++;
        } else if (this.positionTimesCount === this.positionTimes[this.positionTimesIndex]) {
-         this.positionPathIndex++;
+         this.positionIndex++;
          this.positionCount = 0;
          this.positionTimesIndex++;
          this.positionTimesCount = 0;
-       }
-      // else if(this.){
-
-      // }
-       else {
+       } else {
          this.positionTimesCount++;
        }
+
+       if (this.positionIndex >= this.positionPaths.length) this.positionIndex =
+         0;
+       if (this.positionTimesIndex >= this.positionTimes.length) this.positionTimesIndex =
+         0;
+
      },
      draw: function (ctx) {
        ctx.beginPath();

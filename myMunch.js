@@ -21,15 +21,22 @@
    },
 
    assignment: function (objName, objPro, bhrName, bhrPro) {
-     //var objProValue = this.dictionary[objPro](objName);
-     //var bhrProValue = this.dictionary[bhrPro](bhrName);
-     //lookupTable[objName].objProValue = lookupTable[bhrName].bhrProValue;
-     lookupTable[objName].positionPaths = lookupTable[bhrName].positionPaths;
-   },
+     //var objProValue = Mm.dictionary[objPro](objName);
+     var bhrProValue = Mm.dictionary[bhrPro](bhrName);
+     // lookupTable[objName].objProValue = lookupTable[bhrName].bhrProValue;
+     // lookupTable[objName].positionPaths = bhrProValue;
+     // Mm.dictionary[objPro](objName) = bhrProValue;
+     if (objPro === 'position') {
+       lookupTable[objName].positionPaths = bhrProValue;
+     }
+   }
+ };
+
+ var Mm = {
 
    dictionary: {
      'position': function (name) {
-       return positionPaths;
+       return lookupTable[name].positionPaths;
      },
 
      'y': function (stack) {

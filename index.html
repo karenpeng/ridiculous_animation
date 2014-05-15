@@ -100,7 +100,7 @@ Full documentation: http://pegjs.majda.cz/documentation#grammar-syntax-and-seman
 -->
 
 <grammar>
-  start       = p:literal+ { return Machine.eval(p) }
+  start       = p:literal+ { return Mm.eval(p) }
 
   literal     = assign / define / number / string / quotation / word
 
