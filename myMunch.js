@@ -22,11 +22,15 @@
 
    assignment: function (objName, objPro, bhrName, bhrPro) {
      //var objProValue = Mm.dictionary[objPro](objName);
-     var bhrProValue = Mm.dictionary[bhrPro](bhrName);
+     var bhrProValue = Mm.dictionary[bhrPro](objName, bhrName);
      // lookupTable[objName].objProValue = lookupTable[bhrName].bhrProValue;
      // lookupTable[objName].positionPaths = bhrProValue;
      // Mm.dictionary[objPro](objName) = bhrProValue;
      if (objPro === 'position') {
+       lookupTable[objName].positionPaths = bhrProValue;
+     } else if (objPro === 'y') {
+       lookupTable[objName].positionPaths = bhrProValue;
+     } else if (objPro === 'x') {
        lookupTable[objName].positionPaths = bhrProValue;
      }
    }
@@ -35,28 +39,31 @@
  var Mm = {
 
    dictionary: {
-     'position': function (name) {
-       return lookupTable[name].positionPaths;
+     'position': function (name1, name2) {
+       return lookupTable[name2].positionPaths;
      },
 
-     'y': function (stack) {
-       var obj = stack.pop();
-       var objY = [];
-       for (var i = 0; i < obj.path.length; i++) {
-         objY.push([0, obj.path[i][1]]);
+     'y': function (name1, name2) {
+       var x = lookupTable[name1].x;
+       var y = lookupTable[name2].y;
+       var min = Math.min(x.length, y.length);
+       var newArr = [];
+       for (var i = 0; i < min; i++) {
+         newArr.push([x[i][0], y[i][1]]);
        }
-       stack.push(objY);
-       return stack;
+       return [newArr];
      },
 
-     'x': function (stack) {
-       var obj = stack.pop();
-       var objX = [];
-       for (var i = 0; i < obj.path.length; i++) {
-         objX.push([obj.path[i][0], 0]);
+     'x': function (name1, name2) {
+       var x = lookupTable[name2].x;
+       var y = lookupTable[name1].y;
+       var min = Math.min(x.length, y.length);
+       var newArr = [];
+       for (var i = 0; i < min; i++) {
+         newArr.push([x[i][0], y[i][1]]);
+         console.log(x[i][0], y[i][1]);
        }
-       stack.push(objX);
-       return stack;
+       return [newArr];
      },
 
      'size': function (stack) {

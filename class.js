@@ -103,7 +103,7 @@
      draw: function (ctx) {
        ctx.beginPath();
        var dia = this.size[0] + this.size[1];
-       ctx.arc(this.position[0], this.position[1], dia, 0, 2 * Math.PI);
+       ctx.arc(this.x[0], this.y[1], dia, 0, 2 * Math.PI);
        ctx.strokeStyle = '#000';
        ctx.stroke();
      }
