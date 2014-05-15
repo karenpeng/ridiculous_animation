@@ -37,13 +37,13 @@
 
   //-------------------------main------------------------------
 
-  var c;
-  var lines = [];
-  var manyLines = new manyLine();
+  var path;
+  var paths = [];
+  //var manyLines = new manyLine();
   var manyLinesHolder = [];
   var manyTime = [];
   var down = 0;
-  var lineNumber = 0;
+  var pathNumber = 0;
   var manyLineNumber = 0;
   exports.shiftDown = false;
   var startCountGap = false;
@@ -55,27 +55,30 @@
       manyLines.manyTimeIhave.push(countGap);
       countGap = 0;
     }
-    c = new curvyLine();
-    c.begin(e.pageX - editorW, e.pageY);
+    path = new Path();
+    path.add(e.pageX - editorW, e.pageY);
     down = 1;
   });
 
   $("#myCanvas").mousemove(function (e) {
     if (down === 1) {
-      c.middle(e.pageX - editorW, e.pageY);
+      path.add(e.pageX - editorW, e.pageY);
     }
   });
 
   $("#myCanvas").mouseup(function () {
     if (!exports.shiftDown) {
-      lines.push(c);
-      var index = ['line', lineNumber];
+      path.getX();
+      path.getY();
+      path.getPaths();
+      paths.push(path);
+      var index = ['path', pathNumber];
       var dicIndex = index.join("");
-      lookupTable[dicIndex] = lines[lineNumber];
-      c = null;
-      lineNumber++;
+      lookupTable[dicIndex] = paths[pathNumber];
+      path = null;
+      pathNumber++;
     } else {
-      manyLines.manyLinesIhave.push(c);
+      //manyLines.manyLinesIhave.push(path);
       startCountGap = true;
     }
     down = 0;
@@ -92,17 +95,17 @@
     if (e.which === 18) {
       e.preventDefault();
       shiftDown = false;
-      if (manyLines.manyLinesIhave.length !== 0) {
-        var index = ['manyLine', manyLineNumber];
-        var dicIndex = index.join("");
-        lookupTable[dicIndex] = manyLines;
-        c = null;
-        manyLineNumber++;
-        manyTime = [];
-        manyLinesHolder.push(manyLines);
-        manyLines = null;
-        countGap = 0;
-      }
+      // if (manyLines.manyLinesIhave.length !== 0) {
+      //   var index = ['manyLine', manyLineNumber];
+      //   var dicIndex = index.join("");
+      //   lookupTable[dicIndex] = manyLines;
+      //   c = null;
+      //   manyLineNumber++;
+      //   manyTime = [];
+      //   manyLinesHolder.push(manyLines);
+      //   manyLines = null;
+      //   countGap = 0;
+      // }
     }
   });
 
@@ -111,30 +114,30 @@
 
     drawBg();
     drawGrid();
-    if (c) {
-      c.render(context);
+    if (path) {
+      path.render(context);
     }
     for (var key in lookupTable) {
       var item = lookupTable[key];
       //var item = lookupTable.key;
-      if (item instanceof circle) {
-        item.switchArr();
+      if (item instanceof Circle) {
+        item.pointGenerate();
         item.draw(context);
       }
     }
     if (startCountGap) {
       countGap++;
     }
-    if (manyLines) {
-      manyLines.manyLinesIhave.forEach(function (l) {
-        l.render(context);
-      });
-    }
+    // if (manyLines) {
+    //   manyLines.manyLinesIhave.forEach(function (l) {
+    //     l.render(context);
+    //   });
+    //}
   }, 18);
 
-  exports.lines = lines;
-  exports.manyLines = manyLines;
-  exports.manyLinesHolder = manyLinesHolder;
+  exports.paths = paths;
+  //exports.manyLines = manyLines;
+  //exports.manyLinesHolder = manyLinesHolder;
   //exports.shiftDown = shiftDown;
 
 })(this);

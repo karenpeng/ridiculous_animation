@@ -155,6 +155,8 @@
      this.timeNum = 0;
      this.positonDone = false;
      this.positions.push(this.position);
+     this.x = this.position[0];
+     this.y = this.position[1];
    }
    circle.prototype = {
      draw: function (ctx) {
@@ -194,6 +196,8 @@
        }
      }
    };
+
+
 
    exports.curvyLine = curvyLine;
    exports.manyLine = manyLine;

@@ -1,25 +1,35 @@
  var lookupTable = new Object();
- //var stack;
+ var pathIndex = 0;
 
- var Munch = {
+ //功能：
+ //构造behavior
+ //使用behacior
+ //能往外部import obj?
+ //然后对obj使用behavior
+ //怎么对接，数据形式都不一样？
+ //可以返回来修改behavior
+
+ var Machine = {
+   definition: function (objName, objType) {
+     if (objType === 'circle') {
+       lookupTable[objName] = new Circle();
+     } else if (objType === 'triangle') {
+       lookupTable[objName] = new triangle();
+     } else if (objType === 'rectangle') {
+       lookupTable[objName] = new rectangle();
+     }
+   },
+
+   assignment: function (objName, objPro, bhrName, bhrPro) {
+     //var objProValue = this.dictionary[objPro](objName);
+     //var bhrProValue = this.dictionary[bhrPro](bhrName);
+     //lookupTable[objName].objProValue = lookupTable[bhrName].bhrProValue;
+     lookupTable[objName].positionPaths = lookupTable[bhrName].positionPaths;
+   },
+
    dictionary: {
-
-     'circle': function (stack) {
-       var name = stack.pop();
-       lookupTable[name] = new circle();
-       return stack;
-     },
-
-     'triangle': function (stack) {
-       var name = stack.pop();
-       lookupTable[name] = new triangle();
-       return stack;
-     },
-
-     'rectangle': function (stack) {
-       var name = stack.pop();
-       lookupTable[name] = new rectangle();
-       return stack;
+     'position': function (name) {
+       return positionPaths;
      },
 
      'y': function (stack) {
@@ -39,43 +49,6 @@
          objX.push([obj.path[i][0], 0]);
        }
        stack.push(objX);
-       return stack;
-     },
-
-     'position': function (stack) {
-       var obj = stack.pop();
-       if (obj instanceof curvyLine) {
-         var objPos = [];
-         for (var i = 0; i < obj.path.length; i++) {
-           objPos.push(obj.path[i]);
-         }
-         stack.push({
-           pos: [objPos],
-           time: []
-         });
-       } else if (obj instanceof manyLine) {
-         var objPos2 = [];
-         var objPos3 = [];
-         for (var j = 0; j < obj.manyLinesIhave.length; j++) {
-           for (var k = 0; k < obj.manyLinesIhave[j].path.length; k++) {
-             objPos2.push(obj.manyLinesIhave[j].path[k]);
-           }
-           objPos3.push(objPos2);
-           objPos2 = [];
-         }
-         var objTime = [];
-         for (var l = 0; l < obj.manyTimeIhave.length; l++) {
-           objTime.push(obj.manyTimeIhave[l]);
-         }
-         stack.push({
-           pos: objPos3,
-           time: objTime
-         });
-       } else if (typeof obj === 'object') {
-         var whom = stack.pop();
-         whom.positions = obj.pos;
-         whom.timePass = obj.time;
-       }
        return stack;
      },
 
@@ -250,60 +223,34 @@
        stack.push(false);
        return stack;
      }
+     // 'sineWave':function(){
+
+     // }
+     // 'triangleWave':function(){
+
+     // }
+     // 'squareWave':function(){
+
+     // }
+     // '==='
+     //'color'
+
    },
 
-   eval: function (source, initialStack) {
-     // the stack we are operating on
-     var stack;
-     if (initialStack !== undefined)
-     // if an initial stack is provided, use that
-       stack = initialStack;
-     else
-     // otherwise, use an empty array
-       stack = [];
+   eval: function (source) {
 
-     // loop through every item in the source
-     for (var i = 0; i < source.length; i++) {
-       if (source[i].word !== undefined) {
-         // if the item is a word, look it up in the dictionary
-         var wordObj = lookupTable[source[i].word];
+     if (source.indexOf('=>') < 0 && source.indexOf('=') < 0) {
+       //return a new obj
 
-         if (wordObj !== undefined) {
-           stack.push(wordObj);
-         } else {
+     } else if (source.indexOf('=>') >= 0) {
+       //assign value to obj
+       var asn = new Machine.assignment(source[0].word, source[1].word, source[
+         3].word, source[4].word);
 
-           var wordValue = Munch.dictionary[source[i].word];
-           if (typeof wordValue === "function") {
-             // if the word's value is a function execute it with the current stack as an argument
-             // make current stack into the result
-             stack = wordValue(stack.clone());
-
-           } else if (typeof wordValue === "object") {
-             // if the word's value is a quotation, execute it on the current stack
-             for (var j = 0; j < wordValue.length; j++) {
-               var a = Munch.dictionary[wordValue[j].word];
-               stack = a(stack.clone());
-             }
-
-           } else if (wordValue === undefined) {
-             // if the word's value was not found, throw an error
-             //throw new Error("Unknown word '" + source[i].word + "'!");
-             stack.push(source[i].word);
-
-           } else {
-             // else, we know the word's value is not a function or undefined, push it to the stack
-             stack.push(wordValue);
-           }
-         }
-       } else {
-         // else, we know that the item is not a word, push it to the stack
-         stack.push(source[i]);
-
-       }
+     } else if (source.indexOf('=') >= 0) {
+       //define new obj
+       var dfn = new Machine.definition(source[0].word, source[2].word);
      }
-
-     // return the stack we operated on
-     return stack;
 
    }
  }

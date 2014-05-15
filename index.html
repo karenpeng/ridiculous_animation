@@ -53,30 +53,16 @@
     </style>
   </head>
   <body>
-    <!--<div id="editor"></div>-->
     <canvas id="myCanvas"></canvas>
     <canvas id="myCanvas1"></canvas>
-    <!--<button id="run">run</button>-->
-    <!--<code>c circle</code>
-    <code>c line0 y size</code>
-    <code>c line0 pos pos</code>-->
-    <code id="myCode">1 2 +</code>
+    <code id="myCode"></code>
  </body>
-  <!--<script type="text/javascript" charset="utf-8">
-    var editor = ace.edit("editor");
-    editor.setTheme("ace/theme/monokai");
-    //editor.getSession().setMode("ace/mode/javascript");
-    editor.getSession().setUseSoftTabs(true);
-  </script>-->
-  <!--<script type="text/paperscript" src="class.js" canvas="myCanvas"></script>-->
-  <!--<script type="text/paperscript" src="main.js" canvas="myCanvas"></script>
-  <script type="text/paperscript" src="thumbnail.js" canvas="myCanvas1"></script>-->
   <script type="text/javascript" src="lib/jqconsole.js"></script>
   <script type="text/javascript" src="lib/peg.js"></script>
   <script type="text/javascript" src="lib/plt.js"></script>
   <script type="text/javascript" src="lib/sugar.js"></script>
     <script type="text/javascript" src="myMunch.js"></script>
-  <script type="text/javascript" src="obj.js"></script>
+  <script type="text/javascript" src="class.js"></script>
   <script type="text/javascript" src="main_test1.js"></script>
   <script type="text/javascript" src="thumbnail_test.js"></script>
   <script type="text/javascript">
@@ -114,9 +100,13 @@ Full documentation: http://pegjs.majda.cz/documentation#grammar-syntax-and-seman
 -->
 
 <grammar>
-  start       = p:literal+ { return Munch.eval(p) }
+  start       = p:literal+ { return Machine.eval(p) }
 
-  literal     = number / string / quotation / word
+  literal     = assign / define / number / string / quotation / word
+
+  define      = '=' + space { return '=' }
+
+  assign      = '=>' + space { return '=>' }
 
   word        = w:[^\[\] ]+ space { return { word:w.join('') } }
 
@@ -133,14 +123,5 @@ Full documentation: http://pegjs.majda.cz/documentation#grammar-syntax-and-seman
   space       = ' '*
   SPACE       = ' '+ / !.
 </grammar>
-
-<script type="text/javascript">
-var result;
-  $("#run").click(function(){
-    $("#myCode").html(code);
-    result = Munch.eval($("#myCode").contents());
-    $("#myCode").html(result);
-  });
-</script>
 
 </html>

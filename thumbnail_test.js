@@ -12,25 +12,25 @@
 
   $("#myCanvas").mouseup(function () {
     if (!shiftDown) {
-      patterns[lineNumber] = new curvyLine().copyFrom(lines[lineNumber]);
+      patterns[lineNumber] = new Path().copyFrom(paths[lineNumber]);
       patterns[lineNumber].shrink();
       patterns[lineNumber].render(context1);
       lineNumber++;
     }
   });
 
-  $(window).keyup(function (e) {
-    if (e.which === 18) {
-      e.preventDefault();
-      if (manyLines) {
-        manyPatterns[manyNumber] = new manyLine().copyFrom(manyLinesHolder[
-          manyNumber]);
-        manyPatterns[manyNumber].shrink();
-        manyPatterns[manyNumber].render(context1);
-        manyNumber++;
-      }
-    }
-  });
+  // $(window).keyup(function (e) {
+  //   if (e.which === 18) {
+  //     e.preventDefault();
+  //     if (manyLines) {
+  //       manyPatterns[manyNumber] = new manyLine().copyFrom(manyLinesHolder[
+  //         manyNumber]);
+  //       manyPatterns[manyNumber].shrink();
+  //       manyPatterns[manyNumber].render(context1);
+  //       manyNumber++;
+  //     }
+  //   }
+  // });
 
   exports.patterns = patterns;
 
