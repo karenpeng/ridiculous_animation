@@ -44,26 +44,49 @@
      },
 
      'y': function (name1, name2) {
-       var x = lookupTable[name1].x;
+       var pp = lookupTable[name1].positionPaths;
        var y = lookupTable[name2].y;
-       var min = Math.min(x.length, y.length);
-       var newArr = [];
-       for (var i = 0; i < min; i++) {
-         newArr.push([x[i][0], y[i][1]]);
+       var newArr2 = [];
+       if (pp[0].length < 2) {
+         var newArr0 = [];
+         for (var i = 0; i < y.length; i++) {
+           newArr0.push([350, y[i][1]]);
+         }
+         newArr2.push(newArr0);
+       } else {
+         for (var k = 0; k < pp.length; k++) {
+           var newArr1 = [];
+           var min = Math.min(y.length, pp[k].length);
+           for (var j = 0; j < min; j++) {
+             newArr1.push([pp[k][j][0], x[j][0]]);
+           }
+           newArr2.push(newArr1);
+         }
        }
-       return [newArr];
+       return newArr2;
      },
 
      'x': function (name1, name2) {
+       var pp = lookupTable[name1].positionPaths;
        var x = lookupTable[name2].x;
-       var y = lookupTable[name1].y;
-       var min = Math.min(x.length, y.length);
-       var newArr = [];
-       for (var i = 0; i < min; i++) {
-         newArr.push([x[i][0], y[i][1]]);
-         console.log(x[i][0], y[i][1]);
+       var newArr2 = [];
+       if (pp[0].length < 2) {
+         var newArr0 = [];
+         for (var i = 0; i < x.length; i++) {
+           newArr0.push([x[i][0], 300]);
+         }
+         newArr2.push(newArr0);
+       } else {
+         for (var k = 0; k < pp.length; k++) {
+           var newArr1 = [];
+           var min = Math.min(x.length, pp[k].length);
+           for (var j = 0; j < min; j++) {
+             newArr1.push([x[j][0], pp[k][j][1]]);
+           }
+           newArr2.push(newArr1);
+         }
        }
-       return [newArr];
+       return newArr2;
      },
 
      'size': function (stack) {
@@ -265,6 +288,6 @@
        //define new obj
        var dfn = new Machine.definition(source[0].word, source[2].word);
      }
-
+     return null;
    }
  }

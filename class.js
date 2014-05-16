@@ -66,6 +66,7 @@
          [350, 300]
        ]
      ];
+     this.prePositionPaths = this.positionPaths;
      this.positionIndex = 0;
      this.positionCount = 0;
      this.positionPointIndex = 0;
@@ -79,6 +80,15 @@
 
    Circle.prototype = {
      pointGenerate: function () {
+       if (this.prePositionPaths !== this.positionPaths) {
+         this.positionIndex = 0;
+         this.positionCount = 0;
+         this.positionPointIndex = 0;
+         this.positionTimes = [0];
+         this.positionTimesIndex = 0;
+         this.positionTimesCount = 0;
+         this.prePositionPaths = this.positionPaths;
+       }
        this.position = this.positionPaths[this.positionIndex][this.positionCount];
        this.x = [this.position[0], 0];
        this.y = [0, this.position[1]];
