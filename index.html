@@ -50,12 +50,19 @@
         bottom: 0;
         left: 10px;
       }
+      #myCode, #repl{
+        font-size: 18px;
+      }
+      #repl{
+        position: absolute;
+        z-index: 2;
+        margin-left: 10px;
+      }
     </style>
   </head>
   <body>
     <canvas id="myCanvas"></canvas>
     <canvas id="myCanvas1"></canvas>
-    <code id="myCode">c = circle</code>
  </body>
   <script type="text/javascript" src="lib/jqconsole.js"></script>
   <script type="text/javascript" src="lib/peg.js"></script>
@@ -100,13 +107,23 @@ Full documentation: http://pegjs.majda.cz/documentation#grammar-syntax-and-seman
 -->
 
 <grammar>
-  start       = p:literal+ { return Mm.eval(p) }
+  start       = p:literal+ { console.log(p); return Match.eval(p) }
 
-  literal     = assign / define / number / string / quotation / word
+  literal     = operation / assign / define / number / string / quotation / word
 
   define      = '=' + space { return '=' }
 
   assign      = '=>' + space { return '=>' }
+
+  operation   = plus / minus / multiple / devide
+
+  plus        = '+' + space { return '+' }
+
+  minus       = '-' + space { return '-' }
+
+  multiple    = '*' + space { return '*' }
+
+  devide      = '/' + space { return '/' }
 
   word        = w:[^\[\] ]+ space { return { word:w.join('') } }
 

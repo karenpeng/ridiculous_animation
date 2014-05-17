@@ -120,7 +120,7 @@
     for (var key in lookupTable) {
       var item = lookupTable[key];
       //var item = lookupTable.key;
-      if (item instanceof Circle) {
+      if (item instanceof Circle || item instanceof Square || item instanceof Triangle) {
         item.pointGenerate();
         item.draw(context);
       }
