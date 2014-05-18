@@ -7,7 +7,7 @@
    if (obj instanceof Array) {
      var copy = [];
      for (var i = 0, len = obj.length; i < len; i++) {
-       copy[i] = clone(obj[i]);
+       copy[i] = cloneArr(obj[i]);
      }
      return copy;
    }
@@ -21,11 +21,11 @@
  //怎么对接，数据形式都不一样？
  //可以返回来修改behavior
 
- var Match = {
+ var Machine = {
    definition: function (defineIndex, process) {
      var objName = process[defineIndex - 1].word;
      var objType = process[defineIndex + 1].word;
-     console.log(objName, objType);
+
      if (objType === 'circle') {
        lookupTable[objName] = new Circle();
      } else if (objType === 'triangle') {
@@ -47,8 +47,8 @@
        bhrName = process[assignIndex + 1].word;
        bhrPro = process[assignIndex + 2].word;
        bhrProValue = Match.dictionary[bhrPro](objName, objPro, bhrName);
-     } else {
-       bhrProValue = bhrName.newPath;
+     } else if (process[assignIndex + 1].hasOwnProperty('newPath')) {
+       bhrProValue = process[assignIndex + 1].newPath;
      }
 
      if (objPro === 'position') {
@@ -64,15 +64,16 @@
      return process;
    },
 
-   operation: function (operatIndex, process) {
+   operation: function (operationIndex, process) {
      var operator = process[operationIndex];
-     var itemF1 = process[operationIndex - 2];
-     var itemF2 = process[operationIndex - 1];
-     var itemB1 = process[operationIndex + 1];
-     var itemB2 = process[operationIndex + 2];
+     var objName = process[0].word;
+     var objPro = process[1].word;
+     var itemF1 = process[operationIndex - 2].word;
+     var itemF2 = process[operationIndex - 1].word;
+     var itemB1 = process[operationIndex + 1].word;
+     var itemB2 = process[operationIndex + 2].word;
      var a, b, result;
-     if (lookupTable[itemF1] === undefined && lookupTable[itemB1] ===
-       undefined) {
+     if (itemF2 === undefined && itemB1 === undefined) {
        //2 + 2
        a = {
          name: itemF2
@@ -81,7 +82,7 @@
          name: itemB1
        };
        result = {
-         newPath: Match.dictionary[operator](a, b)
+         newPath: Match.dictionary[operator](a, b, objName, objPro)
        };
        process.slice(operationIndex - 1, 3);
        process.push(result);
@@ -96,16 +97,14 @@
          name: itemB1
        };
        result = {
-         newPath: Match.dictionary[operator](a, b)
+         newPath: Match.dictionary[operator](a, b, objName, objPro)
        };
        process.slice(operationIndex - 2, 4);
        process.push(result);
 
-     } else if (lookupTable[itemF1] === undefined && lookupTable[itemB1] !==
-       undefined) {
+     } else if (itemF2 === undefined) {
        //2 + path0 y
-     } else if (lookupTable[itemF1] !== undefined && lookupTable[itemB1] !==
-       undefined) {
+     } else {
        //path0 + path1
        a = {
          name: itemF1,
@@ -115,15 +114,19 @@
          name: itemB1,
          pro: itemB2
        };
+       //Match.dictionary[operator](a, b, objName, objPro);
+       //console.log(operator, a, b, objName, objPro);
        result = {
-         newPath: Match.dictionary[operator](a, b)
+         newPath: Match.dictionary[operator](a, b, objName, objPro)
        };
        process.slice(operationIndex - 2, 5);
        process.push(result);
      }
      return process;
-   },
+   }
+ };
 
+ var Match = {
    dictionary: {
      'position': function (name1, obj1, name2) {
        return lookupTable[name2].positionPaths;
@@ -194,52 +197,64 @@
        return newArr2;
      },
 
-     '+': function (name1, name2) {
-       if (name1.pro === undefined && name2.pro === undefined) {
+     '+': function (name1, name2, objName, objPro) {
+       console.log(name1, name2, objName, objPro);
+       var value1, value2, min, newArr;
+       if (!name1.hasOwnProperty('pro') && !name2.hasOwnProperty('pro')) {
          // 2 + 2
-         return name1 + name2;
-       } else if (name1.pro !== undefined && name2.pro === undefined) {
+         return name1.name + name2.name;
+
+       } else if (name1.hasOwnProperty('pro') && !name2.hasOwnProperty('pro')) {
          // path0 y + 2
-         var newArr = [];
-         var wordValue = lookupTable[name1.name].positionPaths;
-         var copyValue = cloneArr(wordValue);
-         var newArr1 = [];
-         copyValue.forEach(function (item) {
-           var newArr = [];
-           item.forEach(function (key) {
-             if (name1.pro === 'y') {
-               newArr.push([key[0], key[1] + name2.name]);
-             } else if (name1.pro === 'x') {
-               newArr.push([key[0] + name2.name, key[1]]);
-             } else {
-               newArr.push([key[0] + name2.name, key[1] + name2.name]);
-             }
-           });
-           newArr1.push(newArr);
-         });
-         return newArr1;
-       } else if (name1.pro === undefined && name2.pro !== undefined) {
+         value1 = Match.dicitionary[name1.pro](objName, objPro, name1.name);
+         newArr = [];
+         for (var i = 0; i < value1.length; i++) {
+           var newArr0 = [];
+           for (var j = 0; j < value1[j].length; j++) {
+             newArr0.push([name2.name + value1[i][j][0], name2.name +
+               value1[i][j][1]
+             ]);
+           }
+           newArr.push(newArr0);
+         }
+         return newArr;
+
+       } else if (!name1.hasOwnProperty('pro') && name2.hasOwnProperty('pro')) {
          // 2 + path0 y
-       } else if (name1.pro !== undefined && name2.pro !== undefined) {
+         value2 = Match.dicitionary[name2.pro](objName, objPro, name2.name);
+         newArr = [];
+         for (var i = 0; i < value2.length; i++) {
+           var newArr0 = [];
+           for (var j = 0; j < value2[j].length; j++) {
+             newArr0.push([name1.name + value2[i][j][0], name1.name +
+               value2[i][j][1]
+             ]);
+           }
+           newArr.push(newArr0);
+         }
+         return newArr;
+
+       } else if (name1.hasOwnProperty('pro') && name2.pro.hasOwnProperty('pro')) {
          // path0 y + path1 x
-         var newArr = [];
-         var copyValue1 = cloneArr(lookupTable[name1.name].positionPaths);
-         var copyValue2 = cloneArr(lookupTable[name2.name].positionPaths);
-         var newArr1 = [];
-         copyValue.forEach(function (item) {
-           var newArr = [];
-           item.forEach(function (key) {
-             if (name1.pro === 'y') {
-               newArr.push([key[0], key[1] + name2.name]);
-             } else if (name1.pro === 'x') {
-               newArr.push([key[0] + name2.name, key[1]]);
-             } else {
-               newArr.push([key[0] + name2.name, key[1] + name2.name]);
-             }
-           });
-           newArr1.push(newArr);
-         });
-         return newArr1;
+
+         console.log('bingGo');
+
+         value1 = Match.dicitionary[name1.pro](objName, objPro, name1.name);
+         value2 = Match.dicitionary[name2.pro](objName, objPro, name2.name);
+         console.log(value1, value2);
+         min = Math.min(value1.length, value2.length);
+         newArr = [];
+         for (var i = 0; i < min; i++) {
+           var newArr0 = [];
+           var minAgain = Math.min(value1[i], value2[i]);
+           for (var j = 0; j < minAgain; j++) {
+             newArr0.push([value1[i][j][0] + value2[i][j][0], value1[i][j][1] +
+               value2[i][j][1]
+             ]);
+           }
+           newArr.push(newArr0);
+         }
+         return newArr;
        }
      },
 
@@ -261,31 +276,31 @@
      var process = source.clone();
 
      if (process.indexOf('+') >= 0) {
-       process = Match.operation(process.indexOf('+'), process);
+       process = Machine.operation(process.indexOf('+'), process);
      }
 
      if (process.indexOf('-') >= 0) {
-       process = Match.operation(process.indexOf('-'), process);
+       process = Machine.operation(process.indexOf('-'), process);
      }
 
      if (process.indexOf('*') >= 0) {
-       process = Match.operation(process.indexOf('*'), process);
+       process = Machine.operation(process.indexOf('*'), process);
      }
 
      if (process.indexOf('/') >= 0) {
-       process = Match.operation(process.indexOf('/'), process);
+       process = Machine.operation(process.indexOf('/'), process);
      }
 
      if (process.indexOf('=>') >= 0) {
        //assign value to obj
        // Match.assignment(process[0].word, process[1].word, process[
        //   3].word, process[4].word);
-       process = Match.assignment(process.indexOf('=>'), process);
+       process = Machine.assignment(process.indexOf('=>'), process);
      }
 
      if (process.indexOf('=') >= 0) {
        //define new obj
-       process = Match.definition(process.indexOf('='), process);
+       process = Machine.definition(process.indexOf('='), process);
      }
      // else if(){
 

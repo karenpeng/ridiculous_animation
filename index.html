@@ -51,12 +51,12 @@
         left: 10px;
       }
       #myCode, #repl{
-        font-size: 18px;
+        font-size: 16px;
       }
       #repl{
         position: absolute;
         z-index: 2;
-        margin-left: 10px;
+        margin: 10px;
       }
     </style>
   </head>
@@ -107,7 +107,7 @@ Full documentation: http://pegjs.majda.cz/documentation#grammar-syntax-and-seman
 -->
 
 <grammar>
-  start       = p:literal+ { console.log(p); return Match.eval(p) }
+  start       = p:literal+ { return Match.eval(p) }
 
   literal     = operation / assign / define / number / string / quotation / word
 
