@@ -46,9 +46,17 @@
      if (process[assignIndex + 1].hasOwnProperty('word')) {
        bhrName = process[assignIndex + 1].word;
        bhrPro = process[assignIndex + 2].word;
-       bhrProValue = Match.dictionary[bhrPro](objName, objPro, bhrName);
+       bhrProValue = this.dictionary[bhrPro](objName, objPro, bhrName);
      } else if (process[assignIndex + 1].hasOwnProperty('newPath')) {
        bhrProValue = process[assignIndex + 1].newPath;
+     } else if (typeof process[assignIndex + 1] === 'number') {
+       if (objPro === 'size') {
+         bhrProValue = [
+           [
+             [process[assignIndex + 1], 0]
+           ]
+         ];
+       }
      }
 
      if (objPro === 'position') {
@@ -66,81 +74,95 @@
 
    operation: function (operationIndex, process) {
      var operator = process[operationIndex];
-     var objName = process[0].word;
-     var objPro = process[1].word;
-     var itemF1 = process[operationIndex - 2].word;
-     var itemF2 = process[operationIndex - 1].word;
-     var itemB1 = process[operationIndex + 1].word;
-     var itemB2 = process[operationIndex + 2].word;
+     var objName, objPro;
+     if (process[0].hasOwnProperty('word') && process[1].hasOwnProperty('word')) {
+       objName = process[0].word;
+       objPro = process[1].word;
+     }
+     var itemF1 = process[operationIndex - 2];
+     var itemF2 = process[operationIndex - 1];
+     var itemB1 = process[operationIndex + 1];
+     var itemB2 = process[operationIndex + 2];
      var a, b, result;
-     if (itemF2 === undefined && itemB1 === undefined) {
+     if (itemF1 === undefined && itemB2 === undefined || !itemF1.hasOwnProperty(
+       'word') && itemB2 === undefined) {
        //2 + 2
+       //g size => 2 + 2
        a = {
          name: itemF2
        };
        b = {
          name: itemB1
        };
-       result = {
-         newPath: Match.dictionary[operator](a, b, objName, objPro)
-       };
-       process.slice(operationIndex - 1, 3);
+       result = this.dictionary[operator](a, b, objName, objPro);
+       process.splice(operationIndex - 1, 3);
        process.push(result);
 
      } else if (itemB2 === undefined) {
        //path0 y + 2
        a = {
-         name: itemF1,
-         pro: itemF2
+         name: itemF1.word,
+         pro: itemF2.word
        };
        b = {
          name: itemB1
        };
        result = {
-         newPath: Match.dictionary[operator](a, b, objName, objPro)
+         newPath: this.dictionary[operator](a, b, objName, objPro)
        };
-       process.slice(operationIndex - 2, 4);
+       process.splice(operationIndex - 2, 4);
        process.push(result);
 
-     } else if (itemF2 === undefined) {
+     } else if (!itemF2.hasOwnProperty('word')) {
        //2 + path0 y
-     } else {
-       //path0 + path1
        a = {
-         name: itemF1,
-         pro: itemF2
+         name: itemF2,
        };
        b = {
-         name: itemB1,
-         pro: itemB2
+         name: itemB1.word,
+         pro: itemB2.word
        };
-       //Match.dictionary[operator](a, b, objName, objPro);
-       //console.log(operator, a, b, objName, objPro);
        result = {
-         newPath: Match.dictionary[operator](a, b, objName, objPro)
+         newPath: this.dictionary[operator](a, b, objName, objPro)
        };
-       process.slice(operationIndex - 2, 5);
+       process.splice(operationIndex - 1, 4);
+       process.push(result);
+     } else if (itemF1.hasOwnProperty('word') && itemF2.hasOwnProperty('word') &&
+       itemB1.hasOwnProperty('word') && itemB2.hasOwnProperty('word')) {
+       //path0 y + path1 x
+       a = {
+         name: itemF1.word,
+         pro: itemF2.word
+       };
+       b = {
+         name: itemB1.word,
+         pro: itemB2.word
+       };
+       result = {
+         newPath: this.dictionary[operator](a, b, objName, objPro)
+       };
+       process.splice(operationIndex - 2, 5);
        process.push(result);
      }
      return process;
-   }
- };
+   },
 
- var Match = {
    dictionary: {
      'position': function (name1, obj1, name2) {
        return lookupTable[name2].positionPaths;
      },
 
      'y': function (name1, obj1, name2) {
+       console.log(name1, name2);
        var y = lookupTable[name2].y;
        var newArr2 = [];
        if (obj1 !== 'size') {
          var pp = lookupTable[name1].positionPaths;
+         console.log(y, pp);
          if (pp[0].length < 2) {
            var newArr0 = [];
            for (var i = 0; i < y.length; i++) {
-             newArr0.push([350, y[i][1]]);
+             newArr0.push([w, y[i][1]]);
            }
            newArr2.push(newArr0);
          } else {
@@ -162,6 +184,7 @@
          }
          newArr2.push(newArr3);
        }
+       console.log(newArr2);
        return newArr2;
      },
 
@@ -173,7 +196,7 @@
          if (pp[0].length < 2) {
            var newArr0 = [];
            for (var i = 0; i < x.length; i++) {
-             newArr0.push([x[i][0], 300]);
+             newArr0.push([x[i][0], h]);
            }
            newArr2.push(newArr0);
          } else {
@@ -194,11 +217,11 @@
          }
          newArr2.push(newArr3);
        }
+       console.log(newArr2);
        return newArr2;
      },
 
      '+': function (name1, name2, objName, objPro) {
-       console.log(name1, name2, objName, objPro);
        var value1, value2, min, newArr;
        if (!name1.hasOwnProperty('pro') && !name2.hasOwnProperty('pro')) {
          // 2 + 2
@@ -206,55 +229,74 @@
 
        } else if (name1.hasOwnProperty('pro') && !name2.hasOwnProperty('pro')) {
          // path0 y + 2
-         value1 = Match.dicitionary[name1.pro](objName, objPro, name1.name);
+         value1 = this[name1.pro](objName, objPro, name1.name);
          newArr = [];
-         for (var i = 0; i < value1.length; i++) {
-           var newArr0 = [];
-           for (var j = 0; j < value1[j].length; j++) {
-             newArr0.push([name2.name + value1[i][j][0], name2.name +
-               value1[i][j][1]
-             ]);
-           }
-           newArr.push(newArr0);
+
+         for (var j = 0; j < value1[0].length; j++) {
+           newArr0.push([name2.name + value1[0][j][0], name2.name +
+             value1[0][j][1]
+           ]);
          }
-         return newArr;
+         return [newArr];
 
        } else if (!name1.hasOwnProperty('pro') && name2.hasOwnProperty('pro')) {
          // 2 + path0 y
-         value2 = Match.dicitionary[name2.pro](objName, objPro, name2.name);
+         value2 = this[name2.pro](objName, objPro, name2.name);
          newArr = [];
-         for (var i = 0; i < value2.length; i++) {
-           var newArr0 = [];
-           for (var j = 0; j < value2[j].length; j++) {
-             newArr0.push([name1.name + value2[i][j][0], name1.name +
-               value2[i][j][1]
-             ]);
-           }
-           newArr.push(newArr0);
+         for (var l = 0; l < value2[0].length; l++) {
+           newArr1.push([name1.name + value2[0][l][0], name1.name +
+             value2[0][l][1]
+           ]);
          }
-         return newArr;
+         return [newArr];
 
-       } else if (name1.hasOwnProperty('pro') && name2.pro.hasOwnProperty('pro')) {
+       } else if (name1.hasOwnProperty('pro') && name2.hasOwnProperty('pro')) {
          // path0 y + path1 x
-
-         console.log('bingGo');
-
-         value1 = Match.dicitionary[name1.pro](objName, objPro, name1.name);
-         value2 = Match.dicitionary[name2.pro](objName, objPro, name2.name);
-         console.log(value1, value2);
-         min = Math.min(value1.length, value2.length);
+         value1 = this[name1.pro](objName, objPro, name1.name);
+         value2 = this[name2.pro](objName, objPro, name2.name);
+         min = Math.min(value1[0].length, value2[0].length);
          newArr = [];
-         for (var i = 0; i < min; i++) {
-           var newArr0 = [];
-           var minAgain = Math.min(value1[i], value2[i]);
-           for (var j = 0; j < minAgain; j++) {
-             newArr0.push([value1[i][j][0] + value2[i][j][0], value1[i][j][1] +
-               value2[i][j][1]
-             ]);
+         for (var m = 0; m < min; m++) {
+           if (objPro === 'x') {
+             newArr.push([value1[0][m][0] + value2[0][m][0] / 2, h]);
+           } else if (objPro === 'y') {
+             newArr.push([w, value1[0][m][1] + value2[0][m][1] / 2]);
+           } else if (objPro === 'position') {
+             if (name1.pro === 'x' && name2.pro === 'y') {
+               newArr.push([value1[0][m][0], value2[0][m][1]]);
+
+             } else if (name1.pro === 'y' && name2.pro === 'x') {
+               newArr.push([value2[0][m][0], value1[0][m][1]]);
+
+             } else if (name1.pro === 'position' && name2.pro === 'x') {
+               newArr.push([value1[0][m][0] + value2[0][m][0] / 2, value1[0][m]
+                 [1]
+               ]);
+
+             } else if (name1.pro === 'y' && name2.pro === 'position') {
+               newArr.push([value2[0][m][0], value1[0][m][1] + value2[0][m][1] /
+                 2
+               ]);
+
+             } else if (name1.pro === 'x' && name2.pro === 'position') {
+               newArr.push([value1[0][m][0] + value2[0][m][0] / 2, value2[0][m]
+                 [1]
+               ]);
+
+             } else if (name1.pro === 'position' && name2.pro === 'y') {
+               newArr.push([value1[0][m][0], value1[0][m][1] + value2[0][m][1] /
+                 2
+               ]);
+
+             } else if (name1.pro === 'position' && name2.pro === 'position') {
+               newArr.push([value1[0][m][0] + value2[0][m][0] / 2, value1[0][m]
+                 [1] +
+                 value2[0][m][1] / 2
+               ]);
+             }
            }
-           newArr.push(newArr0);
          }
-         return newArr;
+         return [newArr];
        }
      },
 
@@ -292,19 +334,12 @@
      }
 
      if (process.indexOf('=>') >= 0) {
-       //assign value to obj
-       // Match.assignment(process[0].word, process[1].word, process[
-       //   3].word, process[4].word);
        process = Machine.assignment(process.indexOf('=>'), process);
      }
 
      if (process.indexOf('=') >= 0) {
-       //define new obj
        process = Machine.definition(process.indexOf('='), process);
      }
-     // else if(){
-
-     // }
 
      return process;
    }

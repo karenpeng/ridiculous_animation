@@ -194,4 +194,6 @@
    exports.Circle = Circle;
    exports.Square = Square;
    exports.Triangle = Triangle;
+   exports.h = h;
+   exports.w = w;
  })(this);
