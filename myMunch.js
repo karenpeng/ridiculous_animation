@@ -233,7 +233,7 @@
          newArr = [];
 
          for (var j = 0; j < value1[0].length; j++) {
-           newArr0.push([name2.name + value1[0][j][0], name2.name +
+           newArr.push([name2.name + value1[0][j][0], name2.name +
              value1[0][j][1]
            ]);
          }
@@ -244,7 +244,7 @@
          value2 = this[name2.pro](objName, objPro, name2.name);
          newArr = [];
          for (var l = 0; l < value2[0].length; l++) {
-           newArr1.push([name1.name + value2[0][l][0], name1.name +
+           newArr.push([name1.name + value2[0][l][0], name1.name +
              value2[0][l][1]
            ]);
          }
